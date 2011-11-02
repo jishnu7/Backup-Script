@@ -1,0 +1,30 @@
+README
+------
+
+You can run the program using either by
+> sh backup.sh
+or by
+> ./backup.sh
+To run by ./backup.sh, you need to give execution permission to the file. That can be done by
+> chmod +x backup.sh
+
+Parameters
+----------
+> ./backup.sh init  -   initialize backup folder and config files.
+> ./backup.sh backup [file name/folder name/wildcard] - Backup file(s) or folder(s)
+    for example:
+        ./backup.sh backup file.txt     -   to backup a file
+        ./backuo.sh backup *.c          -   to backup all files ending with ".c"
+        ./backup.sh backup folder_name  -   to backup a filder(s)
+
+> ./backup.sh restore [backup id]   -   Restore backup
+    for example:
+        ./backup.sh restore             -   will list current backups
+        ./bacup.sh restore 3            -   restore backup which have id 3 in the list.
+
+> ./backup delete [backup id]   -   Delete a backup
+    for example:
+        ./backup.sh delete              -   will list current backups
+        ./backup.sh delete 3            -   delete backup with id 3 in list
+
+> ./backup empty    -   Delete/distroy all backups"
