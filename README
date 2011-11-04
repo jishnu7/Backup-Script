@@ -27,4 +27,6 @@ Parameters
         ./backup.sh delete              -   will list current backups
         ./backup.sh delete 3            -   delete backup with id 3 in list
 
+> ./backup list     -   List backup files
+
 > ./backup empty    -   Delete/distroy all backups"
