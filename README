@@ -1,7 +1,7 @@
 README
 ------
 
-You can run the program using either by
+You can run this script using either by
 > sh backup.sh
 or by
 > ./backup.sh
