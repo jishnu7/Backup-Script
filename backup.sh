@@ -63,7 +63,7 @@ case $1 in
                 done)
 
                 if [ "$flag" == "TRUE" ]; then
-                    echo -n "A backup of $source_file already exisits. Do you wan to replace ? (y/N) : "
+                    echo -n "A backup of $source_file already exisits. Do you want to replace ? (y/N) : "
                     read choice
                     if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
                         cp -u -r -i $var $BACKUP_FOLDER/$name
