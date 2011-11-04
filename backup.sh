@@ -5,25 +5,32 @@ BACKUP_LIST=$BACKUP_FOLDER/list
 
 function list_backup {
     count=0
-    echo "ID Source File/Folder Location"
-    echo "--------------------------------"
-    cat $BACKUP_LIST | while read LINE
-    do
-           let count++
-           source_folder=${LINE%%|*}
-           rest=${LINE#*|}
-           source_file=${rest%%|*}
-           echo $count $source_folder/$source_file
-    done
+    if [ ! -e $BACKUP_LIST ]; then
+        exit 1
+    else
+        echo -e "ID\tDate\t\t\tSource File/Folder Location"
+        echo "-----------------------------------------------------------"
+        cat $BACKUP_LIST | while read LINE
+        do
+               let count++
+               source_folder=${LINE%%|*}
+               rest=${LINE#*|}
+               date=${rest%%|*}
+               rest=${rest#*|}
+               source_file=${rest%%|*}
+               echo -e $count"\t"$date"\t"$source_folder/$source_file
+        done
+        echo "-----------------------------------------------------------"
+    fi
 }
 
 case $1 in
     init)
-            touch $BACKUP_FOLDER/list
             mkdir -p $BACKUP_FOLDER
             if [[ $? -ne 0 ]] ; then
                 exit 1
             else
+                touch $BACKUP_FOLDER/list
                 echo "Backup folder initialized"
             fi
         ;;
@@ -46,6 +53,7 @@ case $1 in
                     let count++
                     source_folder=${LINE%%|*}
                     rest=${LINE#*|}
+                    rest=${rest#*|}
                     source_file=${rest%%|*}
                     if [[ "$source_folder" == "$PWD" && "$source_file" == "$var" ]]; then
                         flag="TRUE"
@@ -55,29 +63,34 @@ case $1 in
                 done)
 
                 if [ "$flag" == "TRUE" ]; then
-                    cp -u -r -i $var $BACKUP_FOLDER/$name
-                    if [[ $? -ne 0 ]] ; then
-                        exit 1
-                    else
-                        echo "Backup updated for file $var"
-                    fi
-                else
-                    name=$name$(date +-%Y-%m-%d-%H-%M-%S)
-                    while [ -e $BACKUP_FOLDER/$name ]; do
-                        let count++
-                        name=$var.$count
-                    done
-                    back_folder=$BACKUP_FOLDER/$var
-                    parent_folder=$PWD/$var
-                    mkdir -p ${back_folder%\/*}
-                    cp -u -r -i $var $BACKUP_FOLDER/$name
-                    echo ${parent_folder%\/*}\|${var##*/}\|$name >> $BACKUP_LIST
-                    if [[ $? -ne 0 ]] ; then
-                        exit 1
-                    else
-                        echo "Backup created for file $var"
+                    echo -n "A backup of $source_file already exisits. Do you wan to replace ? (y/N) : "
+                    read choice
+                    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+                        cp -u -r -i $var $BACKUP_FOLDER/$name
+                        if [[ $? -ne 0 ]] ; then
+                            exit 1
+                        else
+                            echo "Backup updated for file $var"
+                            break
+                        fi
                     fi
                 fi
+
+                while [ -e $BACKUP_FOLDER/$name ]; do
+                    let count++
+                    name=$var.$count
+                done
+                back_folder=$BACKUP_FOLDER/$var
+                parent_folder=$PWD/$var
+                mkdir -p ${back_folder%\/*}
+                cp -u -r -i $var $BACKUP_FOLDER/$name
+                if [[ $? -ne 0 ]] ; then
+                    exit 1
+                else
+                    echo ${parent_folder%\/*}\|$(date +%Y-%m-%d-%H-%M-%S)\|${var##*/}\|$name >> $BACKUP_LIST
+                    echo "Backup created for file $var"
+                fi
+
             done
 
         else
@@ -101,11 +114,11 @@ case $1 in
                 fi
             else
                list_backup
-               echo "--------------------------------"
-               echo "Please give the backup id/number instead of \"$2\""
+               echo "Give the backup id/number instead of \"$2\""
             fi
         else
             list_backup
+            echo "Give the backup id/number to restore."
         fi
         ;;
     delete)
@@ -127,15 +140,15 @@ case $1 in
                fi
             else
                list_backup
-               echo "--------------------------------"
-               echo "Please give the backup id/number instead of \"$2\""
+               echo "Give the backup id/number instead of \"$2\""
             fi
         else
             list_backup
+            echo "Give the backup id/number to delete."
         fi
         ;;
     empty)
-        echo "Are you sure want to trash all backups ? (y/N)"
+        echo -n "Are you sure want to trash all backups ? (y/N) : "
         read choice
         if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
             rm -rf $BACKUP_FOLDER
@@ -146,14 +159,18 @@ case $1 in
             fi
         fi
         ;;
+    list)
+        list_backup
+        ;;
     *)
-        echo "Backup tool."
-        echo "--------------------------------"
+        echo "Backup/Mirroring Script."
+        echo "-----------------------------------------------------------"
         echo "Parameters"
         echo "init                  -   initialize backup"
         echo "backup [file name/folder name/wildcard] - Backup file(s) or folder(s)"
         echo "restore [backup id]   -   Restore backup"
         echo "delete [backup id]    -   Delete a backup"
+        echo "list                  -   List backup files"
         echo "empty                 -   Delete/distroy all backups"
         
 esac
