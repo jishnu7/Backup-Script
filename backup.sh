@@ -104,6 +104,7 @@ case $1 in
                 line=$(sed -n "$2 p" $BACKUP_LIST)
                 source_folder=${line%%|*};
                 rest=${line#*|}
+                rest=${rest#*|}
                 source_file=${rest%%|*};
                 backup_file=${rest#*|}
                 cp -r -i $BACKUP_FOLDER/$backup_file $source_folder/$source_file
